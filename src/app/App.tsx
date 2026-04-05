@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Navigation } from './Navigation';
 import { useAuthStore } from '@features/auth/store/authStore';
 import { runMigrations } from '@core/database/connection';
+import { StyleSheet } from 'react-native';
 
 const queryClient = new QueryClient();
 
@@ -18,7 +19,7 @@ export const App = () => {
 
   return (
     <SafeAreaProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureHandlerRootView style={styles.container}>
         <QueryClientProvider client={queryClient}>
           <Navigation />
         </QueryClientProvider>
@@ -26,3 +27,7 @@ export const App = () => {
     </SafeAreaProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+});
