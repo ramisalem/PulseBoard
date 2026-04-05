@@ -38,6 +38,6 @@ module.exports = {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@core/(.*)$': '<rootDir>/src/core/$1',
     '^@features/(.*)$': '<rootDir>/src/features/$1',
-    '^@types/(.*)$': '<rootDir>/src/types/$1',
+    '^@typings/(.*)$': '<rootDir>/src/types/$1',
   },
 };

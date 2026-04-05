@@ -28,9 +28,15 @@
       "@/*": ["src/*"],
       "@core/*": ["src/core/*"],
       "@features/*": ["src/features/*"],
-      "@types/*": ["src/types/*"]
+      "@typings/*": ["src/types/*"]
     }
   },
   "include": ["src/**/*", "e2e/**/*", "__tests__/**/*"],
-  "exclude": ["node_modules", "babel.config.js", "metro.config.js", "jest.config.js", "App.tsx", "__tests__/App.test.tsx"]
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js",
+    "__tests__/App.test.tsx"
+  ]
 }
