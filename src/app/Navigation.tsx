@@ -46,9 +46,35 @@ export const Navigation = () => {
               component={DashboardScreen}
               options={{
                 title: 'PulseBoard',
+                headerShown: true,
+                headerStyle: {
+                  backgroundColor: '#111827',
+                },
+                headerTitleStyle: {
+                  color: '#F9FAFB',
+                  fontSize: 20,
+                  fontWeight: 'bold',
+                },
+                headerTintColor: '#F9FAFB',
               }}
             />
-            <Stack.Screen name="MetricDetail" component={MetricDetailScreen} />
+            <Stack.Screen
+              options={{
+                headerShown: true,
+                headerStyle: {
+                  backgroundColor: '#111827',
+                },
+                headerBackTitle: 'Back',
+                headerTitleStyle: {
+                  color: '#F9FAFB',
+                  fontSize: 20,
+                  fontWeight: 'bold',
+                },
+                headerTintColor: '#F9FAFB',
+              }}
+              name="MetricDetail"
+              component={MetricDetailScreen}
+            />
             <Stack.Screen
               name="PendingOps"
               component={PendingOperationsScreen}
