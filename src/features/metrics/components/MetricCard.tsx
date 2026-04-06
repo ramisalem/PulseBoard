@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Dimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -58,27 +58,28 @@ export const MetricCard = memo(({ metric, onPress }: MetricCardProps) => {
   return (
     <Animated.View
       style={[styles.card, animatedCardStyle]}
-      onTouchEnd={() => onPress(metric.id)}
       testID={`metric-card-${metric.id}`}
     >
-      <View style={styles.header}>
-        <Text style={styles.name}>{metric.name}</Text>
-        <Text style={[styles.delta, { color: deltaColor }]}>
-          {deltaSymbol}{' '}
-          {metric.delta !== null ? metric.delta.toFixed(2) : '0.00'}
+      <Pressable style={styles.pressable} onPress={() => onPress(metric.id)}>
+        <View style={styles.header}>
+          <Text style={styles.name}>{metric.name}</Text>
+          <Text style={[styles.delta, { color: deltaColor }]}>
+            {deltaSymbol}{' '}
+            {metric.delta !== null ? metric.delta?.toFixed(2) : '0.00'}
+          </Text>
+        </View>
+
+        <Text style={styles.value} testID="metric-value">
+          {metric?.current_value?.toFixed(1)}
         </Text>
-      </View>
 
-      <Text style={styles.value} testID="metric-value">
-        {metric.current_value.toFixed(1)}
-      </Text>
-
-      <Sparkline
-        data={metric.sparkline}
-        width={120}
-        height={40}
-        isAlerting={metric.is_alerting}
-      />
+        <Sparkline
+          data={metric.sparkline}
+          width={Dimensions.get('window').width * 0.7}
+          height={50}
+          isAlerting={metric.is_alerting}
+        />
+      </Pressable>
     </Animated.View>
   );
 });
@@ -90,7 +91,9 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     marginRight: 12,
-    width: 180,
+    width: '90%',
+    alignSelf: 'center',
+    marginBottom: 12,
   },
   header: {
     flexDirection: 'row',
@@ -104,5 +107,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 8,
+  },
+  pressable: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
   },
 });
