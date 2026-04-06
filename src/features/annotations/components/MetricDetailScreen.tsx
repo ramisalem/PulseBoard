@@ -169,7 +169,7 @@ export const MetricDetailScreen = ({ route, navigation }: Props) => {
         </TouchableOpacity>
       </View>
 
-      <View ref={chartRef}>
+      <View ref={chartRef} collapsable={false}>
         <FullChart
           data={generateMockHistory()}
           width={Dimensions.get('window').width}
