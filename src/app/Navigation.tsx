@@ -24,6 +24,24 @@ export type { RootStackParamList };
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
+const baseHeaderOptions = {
+  headerShown: true,
+  headerStyle: {
+    backgroundColor: '#111827',
+  },
+  headerTitleStyle: {
+    color: '#F9FAFB',
+    fontSize: 20,
+    fontWeight: 'bold' as const,
+  },
+  headerTintColor: '#F9FAFB',
+};
+
+const detailHeaderOptions = {
+  ...baseHeaderOptions,
+  headerBackTitle: 'Back' as const,
+};
+
 export function navigateToMetric(metricId: string) {
   if (navigationRef.isReady()) {
     navigationRef.navigate('MetricDetail', { metricId });
@@ -91,38 +109,18 @@ export const Navigation = () => {
               name="Dashboard"
               component={DashboardScreen}
               options={{
+                ...baseHeaderOptions,
                 title: 'PulseBoard',
-                headerShown: true,
-                headerStyle: {
-                  backgroundColor: '#111827',
-                },
-                headerTitleStyle: {
-                  color: '#F9FAFB',
-                  fontSize: 20,
-                  fontWeight: 'bold',
-                },
-                headerTintColor: '#F9FAFB',
               }}
             />
             <Stack.Screen
-              options={{
-                headerShown: true,
-                headerStyle: {
-                  backgroundColor: '#111827',
-                },
-                headerBackTitle: 'Back',
-                headerTitleStyle: {
-                  color: '#F9FAFB',
-                  fontSize: 20,
-                  fontWeight: 'bold',
-                },
-                headerTintColor: '#F9FAFB',
-              }}
+              options={detailHeaderOptions}
               name="MetricDetail"
               component={MetricDetailScreen}
             />
             <Stack.Screen
               name="PendingOps"
+              options={detailHeaderOptions}
               component={PendingOperationsScreen}
             />
           </>
