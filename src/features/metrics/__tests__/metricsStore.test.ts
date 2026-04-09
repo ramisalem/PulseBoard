@@ -48,7 +48,7 @@ describe('MetricsStore', () => {
 
       useMetricsStore.getState().processMetricBatch([msg1, msg2]);
 
-      const metric = useMetricsStore.getState().metrics['m1'];
+      const metric = useMetricsStore.getState().metrics.m1;
       expect(metric.delta).toBe(5);
       expect(metric.previous_value).toBe(10);
     });
@@ -73,7 +73,7 @@ describe('MetricsStore', () => {
 
       useMetricsStore.getState().processMetricBatch([msg1, msg2]);
 
-      const metric = useMetricsStore.getState().metrics['m1'];
+      const metric = useMetricsStore.getState().metrics.m1;
       expect(metric.delta).toBe(-5);
     });
 
@@ -166,7 +166,7 @@ describe('MetricsStore', () => {
         },
       ]);
 
-      const metric = useMetricsStore.getState().metrics['m1'];
+      const metric = useMetricsStore.getState().metrics.m1;
       expect(metric.name).toBe('Real Metric Name');
       expect(metric.current_value).toBe(15);
     });
@@ -196,7 +196,7 @@ describe('MetricsStore', () => {
         },
       ]);
 
-      const metric = useMetricsStore.getState().metrics['m1'];
+      const metric = useMetricsStore.getState().metrics.m1;
       expect(metric.current_value).toBe(20);
       expect(metric.name).toBe('Metric m1');
     });

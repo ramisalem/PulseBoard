@@ -122,7 +122,11 @@ const refreshControl = useMemo(
           <TouchableOpacity onPress={() => navigation.navigate('PendingOps')}>
             <Text style={styles.link}>Pending Ops</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
+          <TouchableOpacity
+            testID="logout-open-button"
+            onPress={handleLogout}
+            style={styles.logoutBtn}
+          >
             <Text style={styles.logoutText}>Logout</Text>
           </TouchableOpacity>
         </View>

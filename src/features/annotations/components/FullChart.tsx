@@ -5,7 +5,6 @@ import {
   Path,
   Skia,
   Circle,
-  Rect,
 } from '@shopify/react-native-skia';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {

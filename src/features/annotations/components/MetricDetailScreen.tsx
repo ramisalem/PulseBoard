@@ -48,7 +48,7 @@ export const MetricDetailScreen = ({ route, navigation }: Props) => {
         timestamp: new Date(Date.now() - (100 - i) * 60000).toISOString(),
         value: 50 + Math.sin(i / 5) * 20 + Math.random() * 10,
       })),
-    [metricId],
+    [],
   );
 
   useAnnotationsWebSocket(metricId);
@@ -91,7 +91,7 @@ export const MetricDetailScreen = ({ route, navigation }: Props) => {
       const { data } = await apiClient.post('/annotations', optimisticAnnotation);
       // On success: update store with server ID
       syncSuccess(metricId, tempId, data.id);
-    } catch (error) {
+    } catch {
       // On ANY error (server down, timeout, network offline): enqueue
       operationQueueDb.enqueue(
         'create_annotation',

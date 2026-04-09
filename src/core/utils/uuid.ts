@@ -7,7 +7,8 @@
  */
 export function generateId(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = (Math.random() * 16) | 0;
+    const r = Math.floor(Math.random() * 16);
+    // eslint-disable-next-line no-bitwise -- Required for UUID v4 variant bits
     const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
