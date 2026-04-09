@@ -17,7 +17,7 @@ export const LoginScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="login-screen">
       <Text style={styles.title}>PulseBoard</Text>
       <TextInput
         style={styles.input}
@@ -26,6 +26,7 @@ export const LoginScreen = () => {
         placeholder="Username"
         placeholderTextColor="#9CA3AF"
         autoCapitalize="none"
+        testID="username-input"
       />
       <TextInput
         style={styles.input}
@@ -34,11 +35,13 @@ export const LoginScreen = () => {
         placeholder="Password"
         placeholderTextColor="#9CA3AF"
         secureTextEntry
+        testID="password-input"
       />
       <Button
         title={isAuthLoading ? 'Logging in...' : 'Log In'}
         onPress={handleLogin}
         disabled={isAuthLoading}
+        testID="login-button"
       />
     </View>
   );

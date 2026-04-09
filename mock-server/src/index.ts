@@ -38,31 +38,46 @@ interface Annotation {
 const metrics: Map<string, Metric> = new Map();
 const annotations: Map<string, Annotation> = new Map();
 
-const metricNames = [
-  'CPU Usage',
-  'Memory',
-  'Network In',
-  'Network Out',
-  'Disk I/O',
-  'Latency',
-  'Request Rate',
-  'Error Rate',
-  'Active Users',
-  'Queue Depth',
-];
-
 function initMetrics() {
+  // Use predictable IDs for E2E tests
+  const testMetricIds = [
+    'metric-1',
+    'metric-2',
+    'metric-3',
+    'metric-4',
+    'metric-5',
+    'metric-6',
+    'metric-7',
+    'metric-8',
+    'metric-9',
+    'metric-10',
+  ];
+
+  const testMetricValues = [
+    { name: 'CPU Usage', value: 45.5, alertThreshold: 80, isAlerting: false },
+    { name: 'Memory Usage', value: 62.3, alertThreshold: 75, isAlerting: false },
+    { name: 'Network Latency', value: 120.8, alertThreshold: 100, isAlerting: true },
+    { name: 'Network In', value: 35.2, alertThreshold: null, isAlerting: false },
+    { name: 'Network Out', value: 28.7, alertThreshold: null, isAlerting: false },
+    { name: 'Disk I/O', value: 52.1, alertThreshold: 80, isAlerting: false },
+    { name: 'Latency', value: 15.3, alertThreshold: 50, isAlerting: false },
+    { name: 'Request Rate', value: 250.5, alertThreshold: 80, isAlerting: false },
+    { name: 'Active Users', value: 1250, alertThreshold: 2000, isAlerting: false },
+    { name: 'Queue Depth', value: 12, alertThreshold: 50, isAlerting: false },
+  ];
+
   for (let i = 0; i < 10; i++) {
-    const id = uuidv4();
-    const baseValue = Math.random() * 100;
+    const id = testMetricIds[i];
+    const config = testMetricValues[i];
+    const baseValue = config.value;
     metrics.set(id, {
       id,
-      name: metricNames[i],
+      name: config.name,
       current_value: baseValue,
       previous_value: null,
       delta: null,
-      alert_threshold: i % 3 === 0 ? 80 : null,
-      is_alerting: false,
+      alert_threshold: config.alertThreshold,
+      is_alerting: config.isAlerting,
       sparkline: Array(10)
         .fill(0)
         .map(() => baseValue + (Math.random() - 0.5) * 20),
@@ -139,7 +154,7 @@ function triggerAlert() {
   broadcastMetric(metric);
 }
 
-app.get('/metrics/snapshot', (req, res) => {
+app.get('/metrics/snapshot', (_req, res) => {
   res.json({
     metrics: Array.from(metrics.values()),
     snapshot_timestamp: new Date().toISOString(),
@@ -217,7 +232,7 @@ app.post('/auth/login', (req, res) => {
   });
 });
 
-app.post('/auth/refresh', (req, res) => {
+app.post('/auth/refresh', (_req, res) => {
   res.json({
     access_token: 'mock-access-token-' + uuidv4(),
     refresh_token: 'mock-refresh-token-' + uuidv4(),

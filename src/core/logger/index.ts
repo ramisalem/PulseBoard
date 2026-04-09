@@ -93,7 +93,7 @@ export const logger = {
   },
 
   error: (message: string, data?: Record<string, unknown>, tags?: string[]) => {
-    console.error(formatLogEntry(createLogEntry('error', message, data, tags)));
+    console.log(formatLogEntry(createLogEntry('error', message, data, tags)));
   },
 
   sanitize: (message: string, data?: Record<string, unknown>): LogEntry => {

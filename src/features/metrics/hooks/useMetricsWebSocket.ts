@@ -6,6 +6,7 @@ import { logger } from '@core/logger';
 import type { WebSocketMessage } from '@typings/websocket';
 
 const WS_URL = 'ws://localhost:4000/metrics';
+const MAX_RECONNECT_ATTEMPTS_BEFORE_OFFLINE = 3;
 
 export function useMetricsWebSocket() {
   const wsRef = useRef<WebSocket | null>(null);
@@ -74,7 +75,12 @@ export function useMetricsWebSocket() {
         return;
       }
 
-      setConnectionStatus('reconnecting');
+      const attempt = reconnectRef.current?.currentAttempt ?? 0;
+      if (attempt >= MAX_RECONNECT_ATTEMPTS_BEFORE_OFFLINE) {
+        setConnectionStatus('disconnected');
+      } else {
+        setConnectionStatus('reconnecting');
+      }
 
       try {
         await reconnectRef.current?.waitForRetry();

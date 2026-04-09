@@ -31,7 +31,7 @@
       "@typings/*": ["src/types/*"]
     }
   },
-  "include": ["src/**/*", "e2e/**/*", "__tests__/**/*"],
+  "include": ["src/**/*", "e2e/**/*.ts", "__tests__/**/*"],
   "exclude": [
     "node_modules",
     "babel.config.js",
