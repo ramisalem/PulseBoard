@@ -17,16 +17,10 @@ import { useAnnotationsStore } from '@features/annotations/store/annotationsStor
 import { useAnnotationsWebSocket } from '../hooks/useAnnotationsWebSocket';
 import { useBiometricGate } from '@features/auth/hooks/useBiometricGate';
 import { operationQueueDb } from '@features/offlineQueue/services/operationQueue';
+import { apiClient } from '@core/api/client';
 import { FullChart } from './FullChart';
 import { shareChartAsImage } from '../utils/shareChart';
-import NetInfo from '@react-native-community/netinfo';
-
-const generateId = () =>
-  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
+import { generateId } from '@core/utils/uuid';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'MetricDetail'>;
 
@@ -36,7 +30,7 @@ export const MetricDetailScreen = ({ route, navigation }: Props) => {
   const annotations = useAnnotationsStore(
     state => state.annotations[metricId] ?? [],
   );
-  const { addOptimistic, rollback } = useAnnotationsStore();
+  const { addOptimistic, syncSuccess } = useAnnotationsStore();
   const { triggerBiometric } = useBiometricGate();
 
   const [selectedPointIndex, setSelectedPointIndex] = useState<number | null>(
@@ -92,9 +86,13 @@ export const MetricDetailScreen = ({ route, navigation }: Props) => {
     setIsModalVisible(false);
     setInputText('');
 
-    const networkState = await NetInfo.fetch();
-
-    if (!networkState.isConnected) {
+    try {
+      // Try API first (regardless of network state)
+      const { data } = await apiClient.post('/annotations', optimisticAnnotation);
+      // On success: update store with server ID
+      syncSuccess(metricId, tempId, data.id);
+    } catch (error) {
+      // On ANY error (server down, timeout, network offline): enqueue
       operationQueueDb.enqueue(
         'create_annotation',
         optimisticAnnotation,
@@ -102,26 +100,13 @@ export const MetricDetailScreen = ({ route, navigation }: Props) => {
       );
       Alert.alert(
         'Offline',
-        'Annotation saved locally and will sync when online.',
-      );
-      return;
-    }
-
-    try {
-      // In a real app, emit over WebSocket or call API here
-      // Mocking success:
-      // syncSuccess(metricId, tempId, serverId);
-    } catch {
-      rollback(metricId, tempId);
-      Alert.alert(
-        'Sync Error',
-        'Could not save annotation. It has been discarded.',
+        'Could not reach server. Annotation saved locally and will sync when online.',
       );
     }
   };
 
   const handleShareChart = async () => {
-    await shareChartAsImage(chartRef);
+    await shareChartAsImage(chartRef, metric?.name);
   };
 
   if (!metric) {

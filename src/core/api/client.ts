@@ -1,4 +1,5 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import { Platform } from 'react-native';
 import { tokenManager } from '@features/auth/services/tokenManager';
 import type { AuthTokens } from '@typings/auth';
 import { logger } from '@core/logger';
@@ -7,8 +8,17 @@ import { secureStorage } from '@core/security/keychain';
 type OnLogoutRequired = () => void;
 let logoutCallback: OnLogoutRequired | null = null;
 
+// Android emulator needs 10.0.2.2 instead of localhost
+// iOS simulator can use localhost
+const getBaseURL = () => {
+  if (Platform.OS === 'android') {
+    return 'http://10.0.2.2:4000';
+  }
+  return 'http://localhost:4000';
+};
+
 export const apiClient = axios.create({
-  baseURL: 'http://localhost:4000',
+  baseURL: getBaseURL(),
   timeout: 10000,
 });
 

@@ -4,7 +4,7 @@ import { annotationsDb } from '../services/annotationsDb';
 import { operationQueueDb } from '@features/offlineQueue/services/operationQueue';
 import { useAuthStore } from '@features/auth/store/authStore';
 import { logger } from '@core/logger';
-import { v4 as uuidv4 } from 'uuid';
+import { generateId } from '@core/utils/uuid';
 
 interface AnnotationsState {
   annotations: Record<string, Annotation[]>;
@@ -111,7 +111,7 @@ export const useAnnotationsStore = create<AnnotationsState>((set, get) => ({
     }
 
     const annotation: Annotation = {
-      id: uuidv4(),
+      id: generateId(),
       metric_id: metricId,
       user_id: user.id,
       username: user.username,
