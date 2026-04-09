@@ -1,5 +1,12 @@
 import React, { useCallback, useMemo, useEffect } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, Alert } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Alert,
+  RefreshControl,
+} from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
@@ -74,6 +81,18 @@ export const DashboardScreen = () => {
 
   const metricsArray = useMemo(() => Object.values(metrics), [metrics]);
 
+const refreshControl = useMemo(
+  () => (
+    <RefreshControl
+      refreshing={isRefetching}
+      onRefresh={handleRefresh}
+      tintColor="#3B82F6"
+      colors={['#3B82F6']}
+    />
+  ),
+  [isRefetching, handleRefresh],
+);
+
   const handleCardPress = useCallback(
     (id: string) => {
       navigation.navigate('MetricDetail', { metricId: id });
@@ -110,10 +129,10 @@ export const DashboardScreen = () => {
       </View>
 
       {metricsArray.length === 0 ? (
-        <View style={styles.empty}>
+        <View style={styles.empty} testID="empty-metrics-view">
           <Text style={styles.emptyTitle}>No Metrics Available</Text>
           <Text style={styles.emptyText}>
-            Connect to a server or wait for cached data to load.
+            Pull down to refresh or connect to a server.
           </Text>
         </View>
       ) : (
@@ -123,8 +142,7 @@ export const DashboardScreen = () => {
             <MetricCard metric={item} onPress={handleCardPress} />
           )}
           keyExtractor={item => item.id}
-          refreshing={isRefetching}
-          onRefresh={handleRefresh}
+          refreshControl={refreshControl}
           contentContainerStyle={styles.listContent}
         />
       )}
