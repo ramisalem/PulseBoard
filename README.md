@@ -1,97 +1,172 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# PulseBoard
 
-# Getting Started
+A React Native mobile application for real-time metrics monitoring with offline-first architecture, WebSocket synchronization, and local push notifications.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Features
 
-## Step 1: Start Metro
+### Metrics Dashboard
+- Real-time metrics display with line chart visualizations
+- Pull-to-refresh for manual data updates
+- WebSocket-based live updates (2-second intervals)
+- Connection status indicator
+- Sparkline charts using React Native Skia
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+### Annotations
+- Add annotations to metrics at specific data points
+- Biometric authentication for adding annotations
+- Real-time synchronization via WebSocket
+- Offline annotation queue with automatic sync
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+### Offline-First Architecture
+- Local SQLite persistence for metrics and annotations
+- Automatic operation queueing when offline
+- Background sync when connection restored
+- Server-wins conflict resolution strategy
 
-```sh
-# Using npm
-npm start
+### Push Notifications
+- Local notifications when metrics exceed thresholds
+- Deep linking to specific metrics on notification tap
+- Foreground and background notification handling
 
-# OR using Yarn
-yarn start
+## Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| Framework | React Native 0.84.1 |
+| Language | TypeScript 5.8.3 |
+| State Management | Zustand 5.0.12 |
+| Data Fetching | TanStack Query 5.96.1 |
+| Charts | Shopify React Native Skia 2.5.5 |
+| Database | react-native-quick-sqlite 8.2.7 |
+| Networking | Axios 1.14.0 |
+| WebSocket | Custom implementation with backpressure queue |
+| Push Notifications | @notifee/react-native 9.1.8 |
+| Navigation | React Navigation 7.x |
+| List Rendering | Shopify FlashList 2.3.1 |
+| Testing | Jest 30.3.0, Detox 20.50.1 |
+
+
+## Prerequisites
+
+- Node.js >= 22.11.0
+- npm or yarn
+- iOS: Xcode 15+ and CocoaPods
+- Android: Android Studio and SDK 33+
+
+## Installation
+
+```bash
+# Install dependencies
+yarn install
+
+# iOS: Install CocoaPods dependencies
+cd ios && pod install && cd ..
 ```
 
-## Step 2: Build and run your app
+## Running the App
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+```bash
+# Start Metro bundler
+yarn start
 
-### Android
+# Run on iOS
+yarn ios
 
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
+# Run on Android
 yarn android
 ```
 
-### iOS
+## Running Tests
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+### Unit Tests
+```bash
+# Run unit tests
+yarn test
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+# Run with coverage
+yarn test:coverage
 ```
 
-Then, and every time you update your native dependencies, run:
+### E2E Tests with Detox
+```bash
+# Build and run iOS E2E tests
+yarn e2e:ios
 
-```sh
-bundle exec pod install
+# Build and run Android E2E tests
+yarn e2e:android
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+## Environment Variables
 
-```sh
-# Using npm
-npm run ios
+The application requires configuration for API endpoints and WebSocket connections. Create environment configuration in your deployment pipeline or hardcoded constants for development.
 
-# OR using Yarn
-yarn ios
+**Required variables:**
+- `API_BASE_URL` - REST API endpoint
+- `WS_URL` - WebSocket server endpoint
+
+## Project Structure
+
+```
+src/
+├── app/                    # Navigation and app entry
+│   ├── App.tsx            # Main app component
+│   └── Navigation.tsx     # Navigation configuration
+├── core/                  # Core utilities and services
+│   ├── api/               # API client and offline hooks
+│   ├── database/          # SQLite connection and schema
+│   ├── logger/            # Logging utilities
+│   ├── notifications/     # Push notification service
+│   └── websocket/         # WebSocket implementation
+├── features/              # Feature modules
+│   ├── annotations/       # Annotation CRUD and sync
+│   ├── auth/              # Authentication and keychain
+│   ├── metrics/           # Metrics display and WebSocket
+│   └── offlineQueue/      # Offline operation queue
+└── types/                 # TypeScript type definitions
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+## Architecture Notes
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+### Offline-First Design
 
-## Step 3: Modify your app
+The application uses an offline-first architecture with the following components:
 
-Now that you have successfully run the app, let's make changes!
+1. **Local Persistence** - All data stored in SQLite for offline access
+2. **Operation Queue** - Mutations queued when offline, processed FIFO when connected
+3. **Conflict Resolution** - Server-wins strategy with 409 conflict detection
+4. **Network Awareness** - Automatic sync triggered by NetInfo state changes
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+See `docs/OFFLINE_ARCHITECTURE.md` for detailed architecture documentation.
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+### WebSocket Implementation
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+Custom WebSocket implementation with:
+- Backpressure queue for handling high-frequency messages
+- Exponential backoff reconnection strategy
+- Message batch processing (10ms windows)
+- Graceful degradation when offline
 
-## Congratulations! :tada:
+### Testing Strategy
 
-You've successfully run and modified your React Native App. :partying_face:
+- **Unit Tests**: Core business logic, stores, and services (75% coverage target)
+- **E2E Tests**: Critical user paths with Detox
+- **Test Coverage**: Configured for `src/core` and `src/features/*/store|services`
 
-### Now what?
+## API Integration
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+The application integrates with a REST API for:
+- `GET /metrics/snapshot` - Initial metrics load
+- `POST /annotations` - Create annotation
+- `DELETE /annotations/:id` - Delete annotation
 
-# Troubleshooting
+WebSocket endpoint receives real-time metric updates.
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+## Development Notes
 
-# Learn More
+- Biometric authentication is simulated in development (check `MetricDetailScreen.tsx`)
+- Mock WebSocket server runs on localhost:4000
+- SSL pinning configuration available but requires certificate setup
 
-To learn more about React Native, take a look at the following resources:
+## License
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Private assessment project.
