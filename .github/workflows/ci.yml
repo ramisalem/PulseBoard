@@ -15,11 +15,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'yarn'
+          node-version: "22"
+          cache: "yarn"
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: ESLint
         run: yarn lint
@@ -36,11 +36,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'yarn'
+          node-version: "22"
+          cache: "yarn"
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: Run unit tests with coverage
         run: yarn test:coverage --ci --forceExit
