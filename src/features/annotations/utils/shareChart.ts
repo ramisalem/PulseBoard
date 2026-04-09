@@ -6,6 +6,7 @@ import { View } from 'react-native';
 
 export async function shareChartAsImage(
   chartRef: RefObject<View | null>,
+  metricName?: string,
 ): Promise<void> {
   try {
     if (!chartRef.current) {
@@ -19,10 +20,13 @@ export async function shareChartAsImage(
     }
 
     const pngBase64 = image.encodeToBase64();
+    const shareMessage = metricName?.trim()
+      ? `Check out this ${metricName} metric from PulseBoard`
+      : 'Check out this metric from PulseBoard';
 
     const shareOptions = {
       title: 'PulseBoard Metric Chart',
-      message: 'Check out this metric from PulseBoard',
+      message: shareMessage,
       url: `data:image/png;base64,${pngBase64}`,
       type: 'image/png',
     };
