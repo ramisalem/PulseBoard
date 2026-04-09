@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -30,12 +30,6 @@ const generateId = () =>
 
 type Props = NativeStackScreenProps<RootStackParamList, 'MetricDetail'>;
 
-const generateMockHistory = () =>
-  Array.from({ length: 100 }, (_, i) => ({
-    timestamp: new Date(Date.now() - (100 - i) * 60000).toISOString(),
-    value: 50 + Math.sin(i / 5) * 20 + Math.random() * 10,
-  }));
-
 export const MetricDetailScreen = ({ route, navigation }: Props) => {
   const { metricId } = route.params;
   const metric = useMetricsStore(state => state.metrics[metricId]);
@@ -52,6 +46,16 @@ export const MetricDetailScreen = ({ route, navigation }: Props) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const chartRef = useRef<View>(null);
+
+  // Generate consistent mock history for this session
+  const mockHistory = useMemo(
+    () =>
+      Array.from({ length: 100 }, (_, i) => ({
+        timestamp: new Date(Date.now() - (100 - i) * 60000).toISOString(),
+        value: 50 + Math.sin(i / 5) * 20 + Math.random() * 10,
+      })),
+    [metricId],
+  );
 
   useAnnotationsWebSocket(metricId);
 
@@ -70,7 +74,7 @@ export const MetricDetailScreen = ({ route, navigation }: Props) => {
     }
 
     const tempId = generateId();
-    const historyPoint = generateMockHistory()[selectedPointIndex];
+    const historyPoint = mockHistory[selectedPointIndex];
 
     const optimisticAnnotation = {
       id: tempId,
@@ -142,6 +146,7 @@ export const MetricDetailScreen = ({ route, navigation }: Props) => {
         styles.annotationCard,
         item.sync_status === 'pending' && styles.pendingCard,
       ]}
+      testID={`annotation-item-${item.id}`}
     >
       <View style={styles.cardHeader}>
         <Text style={styles.annotationUsername}>@{item.username}</Text>
@@ -164,21 +169,25 @@ export const MetricDetailScreen = ({ route, navigation }: Props) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>{metric?.name ?? 'Loading...'}</Text>
-        <TouchableOpacity onPress={handleShareChart}>
+        <TouchableOpacity
+          onPress={handleShareChart}
+          testID="share-chart-button"
+        >
           <Text style={styles.shareBtn}>Share Chart</Text>
         </TouchableOpacity>
       </View>
 
       <View ref={chartRef} collapsable={false}>
         <FullChart
-          data={generateMockHistory()}
+          data={mockHistory}
           width={Dimensions.get('window').width}
           height={300}
           onPointSelected={handlePointSelected}
+          annotations={annotations}
         />
       </View>
 
-      <Text style={styles.annotationHeader}>
+      <Text style={styles.annotationHeader} testID="annotations-header">
         Annotations ({annotations.length})
       </Text>
       <FlatList
@@ -186,6 +195,7 @@ export const MetricDetailScreen = ({ route, navigation }: Props) => {
         keyExtractor={item => item.id}
         renderItem={renderAnnotation}
         contentContainerStyle={styles.annotationsList}
+        testID="annotations-list"
         ListEmptyComponent={
           <View style={styles.emptyAnnotations}>
             <Text style={styles.emptyAnnotationsText}>
@@ -207,6 +217,7 @@ export const MetricDetailScreen = ({ route, navigation }: Props) => {
               placeholderTextColor="#6B7280"
               autoFocus
               multiline
+              testID="annotation-input"
             />
             <View style={styles.modalActions}>
               <Button
@@ -217,6 +228,7 @@ export const MetricDetailScreen = ({ route, navigation }: Props) => {
               <Button
                 title="Submit (Biometric)"
                 onPress={handleSubmitAnnotation}
+                testID="submit-annotation-button"
               />
             </View>
           </View>
