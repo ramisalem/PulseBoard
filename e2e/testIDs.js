@@ -5,6 +5,7 @@ export const TEST_IDS = {
   LOGIN_BUTTON: 'login-button',
 
   DASHBOARD_SCREEN: 'dashboard-screen',
+  LOGOUT_OPEN_BUTTON: 'logout-open-button',
   METRIC_CARD_PREFIX: 'metric-card-',
 
   ANNOTATIONS_HEADER: 'annotations-header',

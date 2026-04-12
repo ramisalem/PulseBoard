@@ -96,6 +96,8 @@ yarn e2e:ios
 yarn e2e:android
 ```
 
+For prerequisites, what the suite covers, Detox troubleshooting, and CI notes, see [e2e/README.md](e2e/README.md).
+
 ## Environment Variables
 
 The application requires configuration for API endpoints and WebSocket connections. Create environment configuration in your deployment pipeline or hardcoded constants for development.

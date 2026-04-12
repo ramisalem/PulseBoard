@@ -2,21 +2,25 @@
 
 This directory contains end-to-end tests for PulseBoard using Detox.
 
+**More setup detail:** [SETUP.md](SETUP.md) · **Command cheat sheet:** [QUICK_REFERENCE.md](QUICK_REFERENCE.md)
+
 ## Prerequisites
 
-1. Install dependencies:
+1. **Node.js** >= 22.11.0 (see repo root `package.json` `engines`).
+
+2. Install dependencies from the project root:
 
 ```bash
-npm install
+yarn install
 ```
 
-2. For iOS testing:
+3. For iOS testing:
    - Xcode 15 or later
    - iOS Simulator
 
-3. For Android testing:
+4. For Android testing:
    - Android Studio
-   - Android Emulator with API 34
+   - Android Emulator — API **34** is what Detox is configured against in `.detoxrc.js` (the app may support a broader SDK range; see root [README.md](../README.md)).
 
 ## Running Tests
 
@@ -24,85 +28,72 @@ npm install
 
 ```bash
 # Build the app
-npm run e2e:build:ios
+yarn e2e:build:ios
 
 # Run tests
-npm run e2e:test:ios
+yarn e2e:test:ios
 
 # Or build and test in one command
-npm run e2e:ios
+yarn e2e:ios
 ```
 
 ### Android
 
 ```bash
 # Build the app
-npm run e2e:build:android
+yarn e2e:build:android
 
 # Run tests
-npm run e2e:test:android
+yarn e2e:test:android
 
 # Or build and test in one command
-npm run e2e:android
+yarn e2e:android
 ```
 
-## Test Coverage
+`npm run` works the same for these scripts if you prefer npm.
 
-The E2E tests cover the following critical paths:
+## Test coverage (current suite)
 
-### 1. App Launch and Dashboard Rendering
+[`criticalPath.test.ts`](criticalPath.test.ts) exercises:
 
-- App launches successfully
-- User logs in with credentials
-- Dashboard renders with mocked WebSocket data
-- Metric cards are displayed correctly
+### 1. App launch and dashboard
 
-### 2. Navigation to Detail Screen
+- Login with test credentials
+- Dashboard visible after login (mock API + metrics list)
+- Metric cards visible for mocked snapshot data
 
-- User taps a metric card
-- Navigation to metric detail screen works
-- Detail screen displays correctly with annotations list
+### 2. Navigation to metric detail
 
-### 3. Adding Annotations
+- Open first metric from the dashboard
+- Detail screen shows annotations header, list, and share control
+- Hardware back returns to the dashboard
 
-- User can add an annotation
-- Annotation appears in the list immediately
-- Annotation is persisted and visible
+Additional flows (annotations, offline sync, pending ops) can be added in the same file or new specs; keep `testIDs.js` in sync with the app.
 
-### 4. Offline Annotation and Sync
-
-- User creates annotation while offline
-- Annotation is saved locally
-- When network is restored, annotation syncs
-- Offline capabilities work correctly
-
-### 5. Additional Critical Scenarios
-
-- Alerting metrics display visual indicators
-- Navigation back to dashboard works
-- Multiple annotations on same metric
-
-## Test Structure
+## Test structure
 
 ```
 e2e/
 ├── criticalPath.test.ts    # Main E2E test file
-├── init.js                  # Detox initialization
-├── jest.config.js           # Jest configuration for Detox
+├── init.js                 # Detox + mock server bootstrap
+├── jest.config.js          # Jest configuration for Detox
+├── jest.config.advanced.js # Optional advanced Jest config
 ├── testIDs.js              # Centralized test IDs
 └── helpers/
-    ├── mockData.js         # Mock data for tests
-    └── mockWebSocket.js    # Mock WebSocket helper
+    ├── mockData.js
+    ├── mockWebSocket.js
+    ├── utils.ts
+    └── assertions.ts
 ```
 
 ## Configuration
 
-- `.detoxrc.js` - Detox configuration for iOS and Android
-- `e2e/jest.config.js` - Jest configuration specific to E2E tests
+- `.detoxrc.js` — Detox configuration for iOS and Android
+- `e2e/jest.config.js` — Jest configuration for E2E
 
 ## Test IDs
 
-All test IDs are centralized in `e2e/testIDs.js` for easy maintenance:
+All test IDs are centralized in `e2e/testIDs.js` for easy maintenance. Example:
 
 ```javascript
 TEST_IDS = {
@@ -111,74 +102,72 @@ TEST_IDS = {
   PASSWORD_INPUT: 'password-input',
   LOGIN_BUTTON: 'login-button',
   DASHBOARD_SCREEN: 'dashboard-screen',
-  // ... etc
+  LOGOUT_OPEN_BUTTON: 'logout-open-button',
+  // ...
 };
 ```
 
-## Mocking Strategy
+## Mocking strategy
 
-The tests use:
-
-1. **Mock WebSocket Data**: Predefined metrics data for testing
-2. **Mock Annotations**: Test annotation objects
-3. **Network Simulation**: Using Detox's `device.setURLBlacklist()` for offline testing
+1. **Mock server** — `init.js` starts `mock-server` before tests; the app calls `http://localhost:4000` (iOS sim) / `http://10.0.2.2:4000` (Android emu).
+2. **Mock WebSocket data** — helpers supply predefined metrics where applicable.
+3. **Network simulation** — `device.setURLBlacklist()` can be used for offline scenarios in extended tests.
 
 ## Troubleshooting
 
-### iOS Tests Failing
+### iOS tests failing
 
-- Ensure iOS Simulator is running
-- Check that the app builds successfully in Xcode
-- Verify Detox is properly installed
+- Ensure iOS Simulator is running and the app builds in Xcode.
+- Verify Detox is installed and pods are in sync (`cd ios && pod install`).
 
-### Android Tests Failing
+### Android tests failing
 
-- Ensure Android Emulator is running
-- Check that the app builds successfully
-- Verify Android SDK is properly configured
+- Ensure an emulator is running and the Android SDK matches your Detox config.
+- Confirm the app build succeeds.
 
-### Timeout Errors
+### Timeout / “app is busy” / visibility mismatches
 
-- Increase timeout values in `e2e/jest.config.js`
-- Check network connectivity
-- Ensure simulator/emulator has enough resources
+- Skia, FlashList, and animations can keep Detox’s sync layer busy. The suite uses `device.disableSynchronization()` around sensitive waits; extend that pattern if new screens flake.
+- Increase timeouts in `e2e/jest.config.js` if hardware is slow.
+- Run with higher log level to dump the view hierarchy on failure, e.g. `detox test --configuration ios.sim.debug --loglevel trace`.
 
-## Best Practices
+### Watchman recrawl warnings
 
-1. **Use Test IDs**: Always use test IDs for element selection
-2. **Wait for Elements**: Use `waitFor` for async operations
-3. **Clean State**: Each test starts with a fresh app instance
-4. **Independent Tests**: Tests should not depend on each other
-5. **Descriptive Names**: Use clear, descriptive test names
+Follow the hint in the terminal (`watchman watch-del` / `watchman watch-project`) for the project path.
 
-## CI/CD Integration
+## Best practices
 
-These tests can be integrated into CI/CD pipelines:
+1. Prefer stable `testID`s over text where possible.
+2. Use `waitFor` for async UI; pair with sync disable when animations block idle detection.
+3. After `reloadReactNative()`, wait explicitly for login **or** dashboard — not a fixed sleep — while `restoreSession` runs.
+4. Keep tests independent; avoid order-dependent state.
+
+## CI/CD integration
+
+Below is a **minimal** illustration only — real workflows need checkout, Node/yarn install, simulator/emulator boot, and often caching.
 
 ```yaml
-# Example GitHub Actions workflow
+# Example snippet (not copy-paste complete)
 - name: Run E2E Tests (iOS)
-  run: npm run e2e:ios
+  run: yarn e2e:ios
 
 - name: Run E2E Tests (Android)
-  run: npm run e2e:android
+  run: yarn e2e:android
 ```
 
-## Adding New Tests
+## Adding new tests
 
-1. Add test IDs to components
-2. Update `testIDs.js` with new IDs
-3. Create test in `criticalPath.test.ts` or create new test file
-4. Run tests to verify
+1. Add `testID`s to React Native components.
+2. Update `testIDs.js` with new IDs.
+3. Add cases in `criticalPath.test.ts` or a new `*.test.ts` under `e2e/`.
+4. Run `yarn e2e:test:ios` (or Android) locally.
 
 ## Debugging
 
-To debug tests:
-
 ```bash
-# Run with verbose output
-detox test --configuration ios.sim.debug --verbose
+# Verbose Detox output
+detox test --configuration ios.sim.debug --loglevel trace
 
-# Run specific test
-detox test --configuration ios.sim.debug -t "should add an annotation"
+# Specific test name filter
+detox test --configuration ios.sim.debug -t "should tap a metric card"
 ```
